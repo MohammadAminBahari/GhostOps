@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sg/ghostops/models/incident"
 	"sg/ghostops/models/logentry"
-	"sg/ghostops/parser"
 	"sg/ghostops/models/report"
+	"sg/ghostops/parser"
 )
 
 func FileAnalysis(filePath string) (*report.Report, error) {
@@ -30,6 +31,20 @@ func FileAnalysis(filePath string) (*report.Report, error) {
 		} else {
 			report.Stat.Service[entry.Service]++
 			report.Stat.Severity[logentry.SeverityToString[entry.Severity]]++
+		}
+
+		inc := incident.MatchIncident(*entry)
+
+		oldInc, ok := report.GetIncidentByTypeService(inc.Type, inc.AffectedService)
+		if !ok {
+			report.Incident = append(report.Incident, *inc)
+		} else {
+			oldInc.LastSeen = inc.LastSeen
+			oldInc.Frequency++
+			exist := report.DoesSeverityExist(logentry.SeverityToString[inc.Severities[0]])
+			if !exist{
+				oldInc.Severities = append(oldInc.Severities, inc.Severities...)
+			}
 		}
 
 	}
