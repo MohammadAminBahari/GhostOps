@@ -1,6 +1,7 @@
 package incident
 
 import (
+	"fmt"
 	"sg/ghostops/models/logentry"
 	//"sg/ghostops/utils"
 	"time"
@@ -16,7 +17,15 @@ type Incident struct {
 }
 
 func (inc Incident)ShowCL(){
-	
+	fmt.Println(inc.Type)
+	for _, sev := range inc.Severities{
+		fmt.Printf("%s, ", sev)
+	}
+
+	fmt.Printf("Number of Accurance: %d\n on %s Service\n", inc.Frequency, inc.AffectedService)
+	fmt.Printf("First Accurance at: %s\n Last Accurance at: %s", inc.FirstSeen.String(), inc.LastSeen.String())
+
+
 }
 
 
