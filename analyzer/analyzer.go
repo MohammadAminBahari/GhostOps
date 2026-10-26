@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sg/ghostops/models/logentry"
+	"sg/ghostops/parser"
+	"sg/ghostops/models/report"
 )
 
-func FileAnalysis(filePath string) {
+func FileAnalysis(filePath string) (*report.Report, error) {
+	report := report.New()
 	file, err := os.Open("sample.log")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
-		return
+		return nil, err
 	}
 	defer file.Close()
 
@@ -20,10 +24,20 @@ func FileAnalysis(filePath string) {
 		line := scanner.Text()
 		fmt.Println(line)
 
-		// Process the current line here
+		entry, err := parser.ParseLine(line)
+		if err != nil {
+			report.Stat.MalformedEntries++
+		} else {
+			report.Stat.Service[entry.Service]++
+			report.Stat.Severity[logentry.SeverityToString[entry.Severity]]++
+		}
+
 	}
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)
+		return nil, err
 	}
+
+	return report, nil
 }

@@ -1,14 +1,14 @@
 package parser
 
 import (
-	"sg/ghostops/model"
+	"sg/ghostops/models/logentry"
 	"sg/ghostops/utils"
 	"strings"
 	"time"
 
 )
 
-func ParseLine(line string) (*model.LogEntry, error) {
+func ParseLine(line string) (*logentry.LogEntry, error) {
 
 	if len(line) < 4 {
 		return nil, MalformedEntryErr
@@ -23,7 +23,7 @@ func ParseLine(line string) (*model.LogEntry, error) {
 	}
 
 
-	convSev, ok := model.SeverityMap[sections[1]]
+	convSev, ok := logentry.SeverityMap[sections[1]]
 
 	if !ok{
 		return nil, InvalidSeverityErr
@@ -40,7 +40,7 @@ func ParseLine(line string) (*model.LogEntry, error) {
 
 
 
-	entry := model.LogEntry{
+	entry := logentry.LogEntry{
 		TimeStamp: convTime,
 		Severity: convSev,
 		Service: convSer,
