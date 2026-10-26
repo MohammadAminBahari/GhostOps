@@ -1,7 +1,9 @@
 package report
 
 import (
+	"fmt"
 	"sg/ghostops/models/incident"
+	"sg/ghostops/models/logentry"
 	"sg/ghostops/models/stat"
 )
 
@@ -26,19 +28,35 @@ func (r Report)WriteJson(fileName string){
 }
 
 func (r Report)ShowResultCL(){
+	fmt.Println("Satistics: ")
 	r.Stat.ShowCL()
+	fmt.Println("Incidents: ")
 	for _, inc := range r.Incident{
 		inc.ShowCL()
+		fmt.Println("-----------------------------------------")
 	}
+
+	
 }
 
 func (r *Report)GetIncidentByTypeService(name string, service string) (*incident.Incident, bool){
-	// TODO
 
-	return nil, true
+	for  i := range r.Incident{
+		if r.Incident[i].AffectedService == service && r.Incident[i].Type == name{
+			return &r.Incident[i], true
+		}
+	}
+	return nil, false
 }
 
 func (r *Report)DoesSeverityExist(severity string) bool{
-	// TODO
-	return true
+
+	for _, inc := range r.Incident{
+		for _, sev := range inc.Severities{
+			if logentry.SeverityToString[sev] == severity{
+				return true;
+			}
+		}
+	}
+	return false
 }

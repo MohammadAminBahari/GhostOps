@@ -23,8 +23,8 @@ func (inc Incident) ShowCL() {
 		fmt.Printf("%s, ", logentry.SeverityToString[sev])
 	}
 
-	fmt.Printf("Number of Accurance: %d\n on %s Service\n", inc.Frequency, inc.AffectedService)
-	fmt.Printf("First Accurance at: %s\n Last Accurance at: %s", inc.FirstSeen.String(), inc.LastSeen.String())
+	fmt.Printf("Number of Accurance: %d\non %s Service\n", inc.Frequency, inc.AffectedService)
+	fmt.Printf("First Accurance at: %s\nLast Accurance at: %s\n", inc.FirstSeen.String(), inc.LastSeen.String())
 
 }
 

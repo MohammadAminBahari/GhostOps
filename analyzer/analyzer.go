@@ -22,18 +22,28 @@ func FileAnalysis(filePath string) (*report.Report, error) {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
+		report.Stat.TotalEntries++
 		line := scanner.Text()
-		fmt.Println(line)
+		//fmt.Println(line)
 
 		entry, err := parser.ParseLine(line)
 		if err != nil {
 			report.Stat.MalformedEntries++
+			continue
 		} else {
 			report.Stat.Service[entry.Service]++
 			report.Stat.Severity[logentry.SeverityToString[entry.Severity]]++
 		}
 
+		if entry.Severity != logentry.ERROR && entry.Severity != logentry.FATAL {
+			continue
+		}
+
 		inc := incident.MatchIncident(*entry)
+
+		if inc == nil {
+			continue
+		}
 
 		oldInc, ok := report.GetIncidentByTypeService(inc.Type, inc.AffectedService)
 		if !ok {
@@ -42,7 +52,7 @@ func FileAnalysis(filePath string) (*report.Report, error) {
 			oldInc.LastSeen = inc.LastSeen
 			oldInc.Frequency++
 			exist := report.DoesSeverityExist(logentry.SeverityToString[inc.Severities[0]])
-			if !exist{
+			if !exist {
 				oldInc.Severities = append(oldInc.Severities, inc.Severities...)
 			}
 		}

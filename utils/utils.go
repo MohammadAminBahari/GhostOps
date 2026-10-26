@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 // for helper functions
 
@@ -9,4 +12,7 @@ func ExtractServiceName(service string) (string, bool) {
 		len(service) > len("-service")
 }
 
+func CompareTimes(t1 time.Time, t2 time.Time){
+	
+}
 
