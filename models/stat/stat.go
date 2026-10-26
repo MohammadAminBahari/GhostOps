@@ -14,7 +14,7 @@ func (stat Stat) ShowCL() {
 	for key, value := range stat.Service {
 		fmt.Printf("%s: %d \t", key, value)
 	}
-	fmt.Printf("\n Severity Level Satistics: \n")
+	fmt.Printf("\nSeverity Level Satistics: \n")
 	for key, value := range stat.Severity {
 		fmt.Printf("%s: %d \t", key, value)
 	}

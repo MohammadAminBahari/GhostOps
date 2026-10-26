@@ -8,11 +8,12 @@ import (
 	"sg/ghostops/models/logentry"
 	"sg/ghostops/models/report"
 	"sg/ghostops/parser"
+	"sg/ghostops/utils"
 )
 
 func FileAnalysis(filePath string) (*report.Report, error) {
 	report := report.New()
-	file, err := os.Open("sample.log")
+	file, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return nil, err
@@ -49,7 +50,8 @@ func FileAnalysis(filePath string) (*report.Report, error) {
 		if !ok {
 			report.Incident = append(report.Incident, *inc)
 		} else {
-			oldInc.LastSeen = inc.LastSeen
+			oldInc.FirstSeen = utils.GetEarliestTime(oldInc.FirstSeen, inc.FirstSeen)
+			oldInc.LastSeen = utils.GetLatestTime(oldInc.LastSeen, inc.LastSeen)
 			oldInc.Frequency++
 			exist := report.DoesSeverityExist(logentry.SeverityToString[inc.Severities[0]])
 			if !exist {
