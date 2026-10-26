@@ -8,8 +8,7 @@ import "time"
 type SeverityEnum int
 
 const (
-	INVALID_LEVEL = iota
-	INFO
+	INFO = iota + 1
 	ERROR
 	WARN
 	FATAL
@@ -23,7 +22,6 @@ type LogEntry struct {
 }
 
 var SeverityMap = map[string]SeverityEnum{
-	"INVALID_LEVEL": INVALID_LEVEL,
 	"INFO":          INFO,
 	"WARN":          WARN,
 	"ERROR":         ERROR,
@@ -31,7 +29,6 @@ var SeverityMap = map[string]SeverityEnum{
 }
 
 var SeverityToString = map[SeverityEnum]string{
-	INVALID_LEVEL: "INVALID_LEVEL",
 	INFO:          "INFO",
 	WARN:          "WARN",
 	ERROR:         "ERROR",

@@ -10,11 +10,13 @@ import (
 
 func ParseLine(line string) (*logentry.LogEntry, error) {
 
-	if len(line) < 4 {
-		return nil, MalformedEntryErr
-	}
+	
 
 	sections := strings.Fields(line)
+
+	if len(sections) < 4 {
+		return nil, MalformedEntryErr
+	}
 
 	convTime, err := time.Parse(time.RFC3339, sections[0])
 
