@@ -1,7 +1,9 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"sg/ghostops/models/incident"
 	"sg/ghostops/models/logentry"
 	"sg/ghostops/models/stat"
@@ -23,14 +25,19 @@ func New() *Report{
 	}
 }
 
-func (r Report)WriteJson(fileName string){
+func (r Report)WriteJson(fileName string) error{
+	data, err := json.MarshalIndent(r, "", "    ")
+    if err != nil {
+        return err
+    }
 
+    return os.WriteFile(fileName, data, 0644)
 }
 
 func (r Report)ShowResultCL(){
 	fmt.Println("Satistics: ")
 	r.Stat.ShowCL()
-	fmt.Println("Incidents: ")
+	fmt.Println("\nIncidents: ")
 	for _, inc := range r.Incident{
 		inc.ShowCL()
 		fmt.Println("-----------------------------------------")
