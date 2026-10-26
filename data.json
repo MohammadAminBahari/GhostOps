@@ -1,0 +1,132 @@
+{
+    "Stat": {
+        "service_stats": {
+            "auth": 1201,
+            "notification": 1130,
+            "order": 1082,
+            "payment": 1090,
+            "user": 1124
+        },
+        "severity_stats": {
+            "ERROR": 820,
+            "FATAL": 271,
+            "INFO": 3335,
+            "INVALID_LEVEL": 95,
+            "WARN": 1106
+        },
+        "malformed_entries": 373,
+        "total_entries": 6000
+    },
+    "Incident": [
+        {
+            "type": "database_connection_failure",
+            "severity": [
+                4
+            ],
+            "frequency": 34,
+            "affected_service": "user",
+            "first_seen": "2026-10-01T02:19:15Z",
+            "last_seen": "2026-10-06T17:10:16Z"
+        },
+        {
+            "type": "service_crash",
+            "severity": [
+                4
+            ],
+            "frequency": 23,
+            "affected_service": "user",
+            "first_seen": "2026-10-01T03:50:16Z",
+            "last_seen": "2026-10-06T16:35:19Z"
+        },
+        {
+            "type": "payment_gateway_timeout",
+            "severity": [
+                2
+            ],
+            "frequency": 163,
+            "affected_service": "payment",
+            "first_seen": "2026-10-01T00:24:58Z",
+            "last_seen": "2026-10-06T17:19:29Z"
+        },
+        {
+            "type": "database_connection_failure",
+            "severity": [
+                4
+            ],
+            "frequency": 24,
+            "affected_service": "order",
+            "first_seen": "2026-10-01T04:49:50Z",
+            "last_seen": "2026-10-06T17:48:56Z"
+        },
+        {
+            "type": "database_connection_failure",
+            "severity": [
+                4
+            ],
+            "frequency": 29,
+            "affected_service": "notification",
+            "first_seen": "2026-10-01T11:54:10Z",
+            "last_seen": "2026-10-06T15:21:37Z"
+        },
+        {
+            "type": "service_crash",
+            "severity": [
+                4
+            ],
+            "frequency": 28,
+            "affected_service": "payment",
+            "first_seen": "2026-10-01T06:58:46Z",
+            "last_seen": "2026-10-06T09:19:17Z"
+        },
+        {
+            "type": "database_connection_failure",
+            "severity": [
+                4
+            ],
+            "frequency": 30,
+            "affected_service": "auth",
+            "first_seen": "2026-10-01T00:52:07Z",
+            "last_seen": "2026-10-06T18:35:41Z"
+        },
+        {
+            "type": "service_crash",
+            "severity": [
+                4
+            ],
+            "frequency": 39,
+            "affected_service": "order",
+            "first_seen": "2026-10-01T01:50:59Z",
+            "last_seen": "2026-10-06T17:06:43Z"
+        },
+        {
+            "type": "service_crash",
+            "severity": [
+                4
+            ],
+            "frequency": 22,
+            "affected_service": "auth",
+            "first_seen": "2026-10-01T03:41:57Z",
+            "last_seen": "2026-10-06T18:49:45Z"
+        },
+        {
+            "type": "database_connection_failure",
+            "severity": [
+                4
+            ],
+            "frequency": 21,
+            "affected_service": "payment",
+            "first_seen": "2026-10-01T04:39:20Z",
+            "last_seen": "2026-10-06T14:58:35Z"
+        },
+        {
+            "type": "service_crash",
+            "severity": [
+                4
+            ],
+            "frequency": 21,
+            "affected_service": "notification",
+            "first_seen": "2026-10-01T03:09:48Z",
+            "last_seen": "2026-10-06T13:14:08Z"
+        }
+    ]
+}
