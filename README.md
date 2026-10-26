@@ -1,122 +1,107 @@
-# 👻 GhostOps
+# GhostOps
 
-A lightweight Go CLI tool that analyzes log files, summarizes log statistics, and detects potential incidents using keyword-based rules.
+GhostOps is a command-line log analyzer written in Go. It reads a log file line by line, collects statistics about the entries, and groups `ERROR` and `FATAL` entries into incidents using keyword rules. The result is printed to the console and can also be saved as a JSON file.
 
 ## Features
 
-- Reads log files line by line.
-- Counts processed lines and malformed entries.
-- Summarizes valid entries by severity and service.
-- Detects incidents from `ERROR` and `FATAL` log messages.
-- Groups incidents by incident type and affected service.
-- Prints a report in the terminal and can optionally export it to JSON.
+- Counts total entries and malformed entries.
+- Counts entries per service and per severity level.
+- Skips lines that do not match the expected format and counts them as malformed.
+- Detects incidents in `ERROR` and `FATAL` entries by case-insensitive keyword matching.
+- Merges incidents with the same type and service, tracking frequency, severities, and first and last occurrence.
+- Prints a report to the console.
+- Optionally writes the report to a JSON file with the `-o` flag.
 - Uses only the Go standard library.
 
 ## Requirements
 
-- Go version compatible with the version declared in `go.mod`.
+- Go 1.27.2 or newer, as declared in `go.mod`.
 
-## Usage
+## Running the program
 
-Run the analysis from the repository root:
+Run from the repository root:
 
 ```bash
 go run . sample.log
 ```
 
-Save the report to JSON as well:
+To also save the report as JSON:
 
 ```bash
 go run . sample.log -o report.json
 ```
 
-Build an executable:
+To build a binary:
 
 ```bash
 go build -o ghostops .
-```
-
-Then run it with the same arguments:
-
-```bash
-./ghostops sample.log
 ./ghostops sample.log -o report.json
 ```
 
-The input file must be the first argument. The optional `-o` flag is followed by the output JSON filename.
+Arguments:
 
-## Input Format
+- The input log file must be the first argument.
+- `-o <file>` is optional and writes the report as indented JSON to `<file>`.
 
-Each valid log line is expected to have this structure:
+The program prints the input file name, then the statistics and the list of incidents. `data.json` in the repository is an example JSON report produced from `sample.log`.
+
+## Input format
+
+Each line is split on whitespace and must have this form:
 
 ```text
-TIMESTAMP SEVERITY SERVICE MESSAGE
-```
-
-Example:
-
-```text
-2026-10-02T12:20:47Z FATAL user-service Database connection pool exhausted and crashed system
+<timestamp> <severity> <service> <message>
 2026-10-02T10:22:03Z ERROR payment-service Payment gateway timeout - transaction aborted
 ```
 
-- **Timestamp:** RFC3339 timestamp, such as `2026-10-02T12:20:47Z`.
-- **Severity:** `INFO`, `WARN`, `ERROR`, or `FATAL`.
-- **Service:** service name ending in `-service`, such as `payment-service`.
-- **Message:** the rest of the line after the first three fields.
+- `timestamp` must be in RFC 3339 format, for example `2026-10-02T10:22:03Z`.
+- `severity` must be one of the values in `logentry.SeverityMap`: `INFO`, `WARN`, `ERROR`, `FATAL` (or `INVALID_LEVEL`).
+- `service` must end with `-service`. The suffix is removed in the report, so `payment-service` is reported as `payment`.
+- `message` is the rest of the line.
 
-Malformed lines are counted and skipped so analysis can continue. The parser expects a timestamp, a recognized severity, a valid service name, and a message.
+Lines that do not follow this format are counted as malformed and skipped.
 
-## Incident Detection
+### Incident rules
 
-Incident detection uses predefined keywords. The message is matched case-insensitively against the incident rules. In the current implementation, only entries with `ERROR` or `FATAL` severity are checked for incidents.
+Incident types and their keywords are defined in `utils/rules.go`:
 
-Detected incidents are grouped by incident type and affected service. Each incident records its frequency and first/last observed timestamps. Example incident types include:
+- `database_connection_failure`: `database connection`, `connection pool exhausted`
+- `payment_gateway_timeout`: `payment gateway timeout`, `transaction aborted`
+- `authentication_failure`: `authentication failed`, `login failed`, `unauthorized`
+- `network_timeout`: `connection timeout`, `request timeout`, `i/o timeout`
+- `service_crash`: `crashed`, `panic`, `fatal error`
+- `resource_exhaustion`: `out of memory`, `resource exhausted`, `too many open files`
 
-- `database_connection_failure`
-- `payment_gateway_timeout`
-- `service_crash`
+Only entries with severity `ERROR` or `FATAL` are checked. An entry that contains none of the keywords is not reported as an incident.
 
-Keyword matching is heuristic: a matching phrase indicates a potential incident, not proof of a root cause.
-
-## Project Structure
+## Project structure
 
 ```text
 GhostOps/
-├── analyzer/       # Streams through the file, updates statistics, aggregates incidents
+├── main.go                     Entry point and command-line argument handling
+├── go.mod                      Module definition (sg/ghostops)
+├── sample.log                  Sample input log
+├── data.json                   Example JSON report generated from sample.log
+├── analyzer/
+│   └── analyzer.go             FileAnalysis: reads the file and builds the report
+├── parser/
+│   ├── parser.go               ParseLine: converts one line into a LogEntry
+│   └── errors.go               Parsing error values
 ├── models/
-│   ├── incident/   # Incident model and matching logic
-│   ├── logentry/   # Log entry and severity definitions
-│   ├── report/     # Report model and terminal/JSON output
-│   └── stat/       # Summary statistics model
-├── parser/         # Parses and validates individual log lines
-├── utils/          # Shared helpers and incident keywords
-├── main.go         # CLI arguments and application entry point
-├── sample.log      # Sample input log
-└── data.json       # Example/generated JSON report
+│   ├── logentry/log_entry.go   LogEntry, SeverityEnum, and severity maps
+│   ├── incident/incident.go    Incident, MatchIncident, and console output
+│   ├── stat/stat.go            Stat counters and console output
+│   └── report/report.go        Report, JSON output, console output, and lookup helpers
+└── utils/
+    ├── utils.go                Service name extraction and time comparison helpers
+    └── rules.go                Incident keyword rules
 ```
 
-### Main Data Structures
+Processing flow:
 
-- **`LogEntry`** represents a parsed log line: timestamp, severity, service, and message.
-- **`Stat`** stores the number of processed lines, malformed entries, and counts by severity and service.
-- **`Incident`** stores the incident type, observed severities, frequency, affected service, and time range.
-- **`Report`** combines statistics and the list of incidents and provides terminal and JSON output methods.
+1. `main.go` reads the arguments and calls `analyzer.FileAnalysis`.
+2. `FileAnalysis` reads the file line by line and calls `parser.ParseLine` for each line.
+3. Valid entries update the statistics. `ERROR` and `FATAL` entries are passed to `incident.MatchIncident`.
+4. Matched incidents are added to the report or merged with an existing incident of the same type and service.
+5. `main.go` prints the report with `ShowResultCL` and, if `-o` is given, saves it with `WriteJson`.
 
-## Development
-
-Run the package checks with:
-
-```bash
-go test ./...
-```
-
-Add or expand tests for malformed input, empty files, overlapping incident keywords, out-of-order timestamps, and JSON output as the project evolves.
-
-## Possible Improvements
-
-- Validate the number of fields before indexing parsed log fields, and test lines with missing fields.
-- Make incident-rule matching deterministic and decide explicitly whether one log entry may match multiple incident types.
-- Sort statistics and incidents before output so reports have a stable order.
-- Add unit tests for parsing, incident matching, aggregation, and JSON writing.
-- Consider a small output interface only if alternative reporters or easier isolated testing become useful; the current project does not need interfaces just for their own sake.
